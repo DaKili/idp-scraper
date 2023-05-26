@@ -18,7 +18,4 @@ type Project struct {
 	PdfDownload string
 	Type        projectType
 	Date        time.Time
-	// Todo
-	Topic  string
-	Skills []string
 }
