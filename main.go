@@ -15,6 +15,11 @@ func main() {
 	projects := []Project{}
 	ScanERI(&projects)
 
+	// TODO: Move db logic elsewhere
+	// TODO: Read db entries as input for projects array
+	// TODO: Only search for new IDPs
+	// TODO: Only add new IDPs
+
 	host, exists := os.LookupEnv("IDP_SCRAPER_HOST")
 	if !exists {
 		log.Fatal("No host environment variable found.")
