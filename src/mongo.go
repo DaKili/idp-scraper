@@ -11,30 +11,31 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+// Get a map of currently stored projects on the database.
 func getProjects() map[string]Project {
+	// Get connection context and collection.
 	db_connection := getConnectionString()
 	client, ctx, cancel := createClientAndContext(db_connection)
 	defer cancel()
 	defer client.Disconnect(ctx)
 	collection := client.Database("projects").Collection("project_collection")
 
+	// Get iteratable cursor.
 	cursor, err := collection.Find(ctx, bson.M{})
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer cursor.Close(ctx)
 
+	// Get and parse projects.
 	retrievedProjects := make(map[string]Project)
-
 	for cursor.Next(ctx) {
 		var project Project
 		if err := cursor.Decode(&project); err != nil {
 			log.Fatal(err)
 		}
-
 		retrievedProjects[project.Title] = project
 	}
-
 	if err := cursor.Err(); err != nil {
 		log.Fatal(err)
 	}
@@ -42,23 +43,34 @@ func getProjects() map[string]Project {
 	return retrievedProjects
 }
 
-func saveProjects(projects map[string]Project) {
-	// connect
+// Insert a map of projects into the database.
+func saveProjects(newProjects map[string]Project) {
+	if len(newProjects) == 0 {
+		log.Println("No new projects to save.")
+		return
+	}
+
+	// Connect.
 	db_connection := getConnectionString()
 	client, ctx, cancel := createClientAndContext(db_connection)
 	defer cancel()
 	defer client.Disconnect(ctx)
 	collection := client.Database("projects").Collection("project_collection")
 
-	// add projects
-	interfaceProjects := getInterfacesFromProjects(projects)
+	// Add projects.
+	interfaceProjects := getInterfacesFromProjects(newProjects)
 	_, err := collection.InsertMany(ctx, interfaceProjects)
 	if err != nil {
 		log.Fatal(err)
+	} else {
+		log.Printf("Inserted %v new projects.", len(newProjects))
 	}
 }
 
+// Read environment variables into a connection string.
 func getConnectionString() string {
+	// Read necessary environment variables and return connection string.
+	// @seili lmk to give you access to mongodb - you should need an acc.
 	host, exists := os.LookupEnv("IDP_SCRAPER_HOST")
 	if !exists {
 		log.Fatal("No host environment variable found.")
@@ -76,6 +88,7 @@ func getConnectionString() string {
 	return db_connection
 }
 
+// Connect to db and return necessary objects to close when leaving the scope.
 func createClientAndContext(db_connection string) (*mongo.Client, context.Context, context.CancelFunc) {
 	client, err := mongo.NewClient(options.Client().ApplyURI(db_connection))
 	if err != nil {
@@ -92,6 +105,7 @@ func createClientAndContext(db_connection string) (*mongo.Client, context.Contex
 	return client, ctx, cancel
 }
 
+// Convert all projects of a map into an interface array for MongoDB.
 func getInterfacesFromProjects(projects map[string]Project) []interface{} {
 	interfaceProjects := make([]interface{}, len(projects))
 	i := 0

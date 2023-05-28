@@ -21,6 +21,7 @@ const EriProjectPath = "/en/ent/teaching/project-studies-and-idps/"
 
 func ScanERI(projects *map[string]Project, existingProjects *map[string]Project) {
 	doc := getDocumentFromURL(getAbsoluteURL(EriProjectPath))
+	var lastNew bool = true
 
 	for {
 		doc.Find(".article.articletype-3").Each(func(index int, item *goquery.Selection) {
@@ -31,6 +32,7 @@ func ScanERI(projects *map[string]Project, existingProjects *map[string]Project)
 
 			// break, if current project already exists
 			if _, ok := (*existingProjects)[project.Title]; ok {
+				lastNew = false
 				return
 			}
 
@@ -70,6 +72,9 @@ func ScanERI(projects *map[string]Project, existingProjects *map[string]Project)
 			(*projects)[project.Title] = project
 		})
 
+		if !lastNew {
+			return
+		}
 		// Check next page
 		nextLink, exists := doc.Find("ul.f3-widget-paginator li.next a").Attr("href")
 		if exists {
