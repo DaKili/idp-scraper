@@ -19,7 +19,7 @@ var (
 const EriBaseURL = "https://www.ie.mgt.tum.de/"
 const EriProjectPath = "/en/ent/teaching/project-studies-and-idps/"
 
-func ScanERI(projects *[]Project) {
+func ScanERI(projects *map[string]Project, existingProjects *map[string]Project) {
 	doc := getDocumentFromURL(getAbsoluteURL(EriProjectPath))
 
 	for {
@@ -28,6 +28,11 @@ func ScanERI(projects *[]Project) {
 			project := Project{Chair: "TUM Enterpreneurship Research Institute", School: "TUM School of Management"}
 			// Extract title
 			project.Title = strings.TrimSpace(item.Find(".news-header-link").Text())
+
+			// break, if current project already exists
+			if _, ok := (*existingProjects)[project.Title]; ok {
+				return
+			}
 
 			// Extract type
 			if strings.HasPrefix(project.Title, "IDP") {
@@ -62,7 +67,7 @@ func ScanERI(projects *[]Project) {
 			}
 
 			// Append to list
-			*projects = append(*projects, project)
+			(*projects)[project.Title] = project
 		})
 
 		// Check next page
