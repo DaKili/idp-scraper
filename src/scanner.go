@@ -25,18 +25,18 @@ func ScanERI(projects *map[string]Project, existingProjects *map[string]Project)
 
 	for {
 		doc.Find(".article.articletype-3").Each(func(index int, item *goquery.Selection) {
-			// Create object
+			// Create object.
 			project := Project{Chair: "TUM Enterpreneurship Research Institute", School: "TUM School of Management"}
-			// Extract title
+			// Extract title.
 			project.Title = strings.TrimSpace(item.Find(".news-header-link").Text())
 
-			// break, if current project already exists
+			// Break, if current project already exists.
 			if _, ok := (*existingProjects)[project.Title]; ok {
 				lastNew = false
 				return
 			}
 
-			// Extract type
+			// Extract type.
 			if strings.HasPrefix(project.Title, "IDP") {
 				project.Type = TypeIDP
 			} else if strings.HasPrefix(project.Title, "Project Study") {
@@ -45,7 +45,7 @@ func ScanERI(projects *map[string]Project, existingProjects *map[string]Project)
 				project.Type = TypeMisc
 			}
 
-			// Extract date
+			// Extract date.
 			dateString := strings.TrimSpace(item.Find("time").Text())
 			date, err := time.Parse("02.01.2006", dateString)
 			if err != nil {
@@ -53,11 +53,11 @@ func ScanERI(projects *map[string]Project, existingProjects *map[string]Project)
 			}
 			project.Date = date
 
-			// Extract description
+			// Extract description.
 			description := descriptionSanitizer.ReplaceAllString(item.Find("p[itemprop=description]").Text(), "")
 			project.Description = description
 
-			// Extract download link
+			// Extract download link.
 			link, exists := item.Find(".news-header-link").Attr("href")
 			if exists {
 				subDoc := getDocumentFromURL(getAbsoluteURL(link))
@@ -68,14 +68,14 @@ func ScanERI(projects *map[string]Project, existingProjects *map[string]Project)
 				}
 			}
 
-			// Append to list
+			// Append to list.
 			(*projects)[project.Title] = project
 		})
 
 		if !lastNew {
 			return
 		}
-		// Check next page
+		// Check next page.
 		nextLink, exists := doc.Find("ul.f3-widget-paginator li.next a").Attr("href")
 		if exists {
 			fmt.Println(nextLink)
