@@ -7,6 +7,7 @@ type projectType string
 const (
 	TypeIDP  projectType = "IDP"
 	TypePS   projectType = "Project Study"
+	TypeAP   projectType = "Application Project"
 	TypeMisc projectType = "Undefined"
 )
 
@@ -16,6 +17,6 @@ type Project struct {
 	Description string
 	Title       string
 	PdfDownload string
-	Type        projectType
-	Date        time.Time
+	Type        []projectType
+	FirstSeen   time.Time
 }

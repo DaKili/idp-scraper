@@ -11,6 +11,15 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+func delProjects() {
+	db_connection := getConnectionString()
+	client, ctx, cancel := createClientAndContext(db_connection)
+	defer cancel()
+	defer client.Disconnect(ctx)
+	collection := client.Database("projects").Collection("project_collection")
+	collection.DeleteMany(ctx, bson.M{})
+}
+
 // Get a map of currently stored projects on the database.
 func getProjects() map[string]Project {
 	// Get connection context and collection.
