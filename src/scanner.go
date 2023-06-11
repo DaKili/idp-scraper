@@ -86,7 +86,7 @@ func ScanERI(projects *map[string]Project, existingProjects *map[string]Project)
 	}
 }
 
-// Wrapper to reduce boiler plate.
+// Wrapper to reduce boiler plate of getting the document representation of a url.
 func getDocumentFromURL(url string) *goquery.Document {
 	res, err := http.Get(url)
 	if err != nil {
