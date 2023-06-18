@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IDPs for TUM CIT</title>
+</head>
+<body>
+    <h1>Heyo.</h1>
+    <table>
+        <tr>
+            <th>Title</th>
+            <th>Description</th>
+            <th>First seen</th>
+        </tr>
+        {{range $key, $value := .}}
+        <tr>
+            <td>{{$key}}</td>
+            <td>{{$value.Description}}</td>
+            <td>{{$value.FirstSeen}}</td>
+        </tr>
+        {{end}}
+
+    </table>
+</body>
+</html>

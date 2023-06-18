@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -23,6 +24,7 @@ func delProjects() {
 // Get a map of currently stored projects on the database.
 func getProjects() map[string]Project {
 	// Get connection context and collection.
+	fmt.Println("Getting DB connection")
 	db_connection := getConnectionString()
 	client, ctx, cancel := createClientAndContext(db_connection)
 	defer cancel()
@@ -30,6 +32,7 @@ func getProjects() map[string]Project {
 	collection := client.Database("projects").Collection("project_collection")
 
 	// Get iteratable cursor.
+	fmt.Printf("Retrieving project_collection")
 	cursor, err := collection.Find(ctx, bson.M{})
 	if err != nil {
 		log.Fatal(err)
@@ -38,6 +41,7 @@ func getProjects() map[string]Project {
 
 	// Get and parse projects.
 	retrievedProjects := make(map[string]Project)
+	fmt.Println("Converting project_collection to []Project")
 	for cursor.Next(ctx) {
 		var project Project
 		if err := cursor.Decode(&project); err != nil {
