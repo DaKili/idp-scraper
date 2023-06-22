@@ -22,7 +22,7 @@ func delProjects() {
 }
 
 // Get a map of currently stored projects on the database.
-func getProjects() map[string]Project {
+func getProjects() []Project {
 	// Get connection context and collection.
 	fmt.Println("Getting DB connection")
 	db_connection := getConnectionString()
@@ -40,14 +40,14 @@ func getProjects() map[string]Project {
 	defer cursor.Close(ctx)
 
 	// Get and parse projects.
-	retrievedProjects := make(map[string]Project)
+	var retrievedProjects []Project
 	fmt.Println("Converting project_collection to []Project")
 	for cursor.Next(ctx) {
 		var project Project
 		if err := cursor.Decode(&project); err != nil {
 			log.Fatal(err)
 		}
-		retrievedProjects[project.Title] = project
+		retrievedProjects = append(retrievedProjects, project)
 	}
 	if err := cursor.Err(); err != nil {
 		log.Fatal(err)
@@ -57,8 +57,8 @@ func getProjects() map[string]Project {
 }
 
 // Insert a map of projects into the database.
-func saveProjects(newProjects map[string]Project) {
-	if len(newProjects) == 0 {
+func saveProjects(newProjects *Projects) {
+	if len(*newProjects) == 0 {
 		log.Println("No new projects to save.")
 		return
 	}
@@ -76,7 +76,7 @@ func saveProjects(newProjects map[string]Project) {
 	if err != nil {
 		log.Fatal(err)
 	} else {
-		log.Printf("Inserted %v new projects.", len(newProjects))
+		log.Printf("Inserted %v new projects.", len(*newProjects))
 	}
 }
 
@@ -119,10 +119,10 @@ func createClientAndContext(db_connection string) (*mongo.Client, context.Contex
 }
 
 // Convert all projects of a map into an interface array for MongoDB.
-func getInterfacesFromProjects(projects map[string]Project) []interface{} {
-	interfaceProjects := make([]interface{}, len(projects))
+func getInterfacesFromProjects(projects *Projects) []interface{} {
+	interfaceProjects := make([]interface{}, len(*projects))
 	i := 0
-	for _, v := range projects {
+	for _, v := range *projects {
 		interfaceProjects[i] = v
 		i++
 	}

@@ -3,24 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://unpkg.com/htmx.org@1.9.2" integrity="sha384-L6OqL9pRWyyFU3+/bjdSri+iIphTN/bvYyM37tICVyOJkWZLpP2vGn6VUEXgzg6h" crossorigin="anonymous"></script>
     <title>IDPs for TUM CIT</title>
 </head>
 <body>
     <h1>Heyo.</h1>
+    <button hx-delete="/clear_database/" hx-target="#table-body">Clear</button>
+    <button hx-get="/update_database/" hx-target="#table-body">Update database</button>
     <table>
-        <tr>
-            <th>Title</th>
-            <th>Description</th>
-            <th>First seen</th>
-        </tr>
-        {{range $key, $value := .}}
-        <tr>
-            <td>{{$key}}</td>
-            <td>{{$value.Description}}</td>
-            <td>{{$value.FirstSeen}}</td>
-        </tr>
-        {{end}}
-
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Description</th>
+                <th hx-get="/sort_date/" hx-target="#table-body">First seen</th>
+            </tr>
+        </thead>
+        <tbody id="table-body" hx-swap="outerHTML" >
+            {{range .Projects}}
+            <tr>
+                <td>{{.Title}}</td>
+                <td>{{.Description}}</td>
+                <td>{{.FirstSeen}}</td>
+            </tr>
+            {{end}}
+        </tbody>
     </table>
 </body>
 </html>

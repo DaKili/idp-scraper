@@ -64,7 +64,7 @@ func ScanFaC(newProjects *map[string]Project, existingProjects *map[string]Proje
 	// No pagination in FaC.
 }
 
-func ScanERI(newProjects *map[string]Project, existingProjects *map[string]Project) {
+func ScanERI(newProjects *Projects, existingProjects *Projects) {
 	doc := getDocumentFromURL(getAbsoluteURL(EriBaseURL, EriProjectPath))
 	var lastNew bool = true
 
@@ -75,8 +75,16 @@ func ScanERI(newProjects *map[string]Project, existingProjects *map[string]Proje
 			// Extract title.
 			project.Title = strings.TrimSpace(item.Find(".news-header-link").Text())
 
+			// Extract date.
+			dateString := strings.TrimSpace(item.Find("time").Text())
+			date, err := time.Parse("02.01.2006", dateString)
+			if err != nil {
+				log.Fatal(err)
+			}
+			project.FirstSeen = date
+
 			// Break, if current project already exists.
-			if _, ok := (*existingProjects)[project.Title]; ok {
+			if (*existingProjects).Contains(project) {
 				lastNew = false
 				return
 			}
@@ -89,14 +97,6 @@ func ScanERI(newProjects *map[string]Project, existingProjects *map[string]Proje
 			} else {
 				project.Type = []projectType{TypeMisc}
 			}
-
-			// Extract date.
-			dateString := strings.TrimSpace(item.Find("time").Text())
-			date, err := time.Parse("02.01.2006", dateString)
-			if err != nil {
-				log.Fatal(err)
-			}
-			project.FirstSeen = date
 
 			// Extract description.
 			description := eriDescriptionSanitizer.ReplaceAllString(item.Find("p[itemprop=description]").Text(), "")
@@ -114,7 +114,7 @@ func ScanERI(newProjects *map[string]Project, existingProjects *map[string]Proje
 			}
 
 			// Append to list.
-			(*newProjects)[project.Title] = project
+			newProjects.Append(project)
 		})
 
 		if !lastNew {
